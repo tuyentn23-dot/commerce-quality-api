@@ -18,6 +18,10 @@ Subscribe to BASIC and run `validateInvoiceArithmetic` in the RapidAPI playgroun
 
 Checks: total = subtotal + tax + shipping - discount; subtotal equals supplied line totals when lines are present; each line total equals quantity × unit price. Default tolerance is 0.01 in the unit you provide. Use decimal strings for amounts and set tolerance deliberately for your currency/workflow. This service does not authenticate invoices, establish tax compliance, verify vendors, convert currency or detect fraud. A valid result may contain consistently incorrect input. Review missing extraction fields rather than replacing them with zero.
 
+## Validator-only n8n starter
+
+Already using another extractor? Download [the validator-only starter](examples/n8n_validator_trial.json) and follow [the setup guide](examples/README.md). Subscribe to Validator BASIC only, then select your own Header Auth credential. One manual execution uses three requests: one arithmetic pass and two mismatches. Local input/classification checks passed; real n8n import/execution remains unverified. The workflow never authorizes payment or accounting posting.
+
 ## Integrations
 
 [Python pipeline, mapping guide and inactive n8n template](examples/README.md) connect the existing [Invoice Extractor](https://rapidapi.com/tuyentn23/api/invoice-to-json-extractor1) to this validator. Keys are configured in the environment or credential manager and are absent from the examples. The n8n template has not yet been executed in a live n8n installation.

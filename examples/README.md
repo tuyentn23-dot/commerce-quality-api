@@ -1,5 +1,15 @@
 # Try Invoice Validator
 
+## Validator-only n8n starter
+
+Already have an OCR/extraction provider? Start with [n8n_validator_trial.json](n8n_validator_trial.json); it needs only the Validator BASIC subscription, not the Extractor subscription. Download the JSON and import it using n8n's **Import from File**. Create/select your own Header Auth credential with header `X-RapidAPI-Key` in **Validate arithmetic**. Never paste a key into the workflow JSON or send it to us.
+
+One manual execution sends **three synthetic requests** and consumes three requests from your monthly quota. The final node reports one `passed` and two `mismatch` results. Mismatches request manual review; arithmetic passes continue other checks. Neither result authorizes payment or automatic accounting posting. HTTP authentication/quota/server failures stop execution rather than becoming an arithmetic result. Free hosting can cause timeouts; inspect completed nodes before repeating a run because it may consume additional requests.
+
+Code-node inputs and result classification were executed locally against the API contract fixtures, including malformed responses. Import and execution inside a real n8n instance remain unverified. See [n8n's HTTP Request documentation](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.httprequest/) and [workflow import documentation](https://docs.n8n.io/workflows/export-import/).
+
+After evaluation, replace the synthetic input node with your reviewed invoice JSON and preserve required fields. Do not replace missing amounts with zero. Start with this isolated check before adding your own OCR or accounting integration.
+
 1. Subscribe to BASIC on [Invoice Arithmetic Validator](https://rapidapi.com/tuyentn23/api/invoice-arithmetic-validator).
 2. Choose **Validate invoice arithmetic** and run the supplied example. A correct example returns `valid: true`. Change total from 110 to 120 to get a field-level mismatch.
 3. To try the validator alone, set your own `RAPIDAPI_KEY` in your terminal or secret manager, then run the standard-library example:

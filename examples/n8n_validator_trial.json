@@ -1,0 +1,114 @@
+{
+  "name": "Invoice arithmetic review \u2014 three synthetic checks (RapidAPI)",
+  "nodes": [
+    {
+      "id": "start",
+      "name": "Run three synthetic checks",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "cases",
+      "name": "Synthetic invoice cases",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "jsCode": "return [{\"case_name\": \"correct\", \"invoice_check\": {\"subtotal\": \"0.10\", \"tax\": \"0.20\", \"total\": \"0.30\", \"tolerance\": \"0\"}}, {\"case_name\": \"wrong-total\", \"invoice_check\": {\"subtotal\": \"100\", \"tax\": \"10\", \"total\": \"120\"}}, {\"case_name\": \"wrong-line\", \"invoice_check\": {\"subtotal\": \"20\", \"total\": \"20\", \"lines\": [{\"quantity\": \"2\", \"unit_price\": \"8\", \"line_total\": \"20\"}]}}].map(value => ({json:value}));"
+      }
+    },
+    {
+      "id": "validate",
+      "name": "Validate arithmetic",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://invoice-arithmetic-validator.p.rapidapi.com/v1/invoices/validate",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-RapidAPI-Host",
+              "value": "invoice-arithmetic-validator.p.rapidapi.com"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.invoice_check) }}",
+        "options": {
+          "timeout": 90000
+        }
+      }
+    },
+    {
+      "id": "review",
+      "name": "Interpret review result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "if (typeof $json.valid !== 'boolean' || $json.scope !== 'arithmetic_only' || !Array.isArray($json.issues)) {\n  throw new Error('Unexpected validator response: stop for manual review');\n}\nif (($json.valid && $json.issues.length !== 0) || (!$json.valid && $json.issues.length === 0)) {\n  throw new Error('Inconsistent validator response: stop for manual review');\n}\nreturn {json: {\n  arithmetic_status: $json.valid ? 'passed' : 'mismatch',\n  next_step: $json.valid ? 'continue_other_checks' : 'manual_review_required',\n  automatic_payment_authorized: false,\n  automatic_accounting_post_authorized: false,\n  validation: $json\n}};"
+      }
+    }
+  ],
+  "connections": {
+    "Run three synthetic checks": {
+      "main": [
+        [
+          {
+            "node": "Synthetic invoice cases",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Synthetic invoice cases": {
+      "main": [
+        [
+          {
+            "node": "Validate arithmetic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate arithmetic": {
+      "main": [
+        [
+          {
+            "node": "Interpret review result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
