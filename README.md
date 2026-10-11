@@ -24,9 +24,9 @@ Checks: total = subtotal + tax + shipping - discount; subtotal equals supplied l
 
 ## Other backend functions
 
-The same backend contains `/v1/contacts/normalize` (up to 200 contacts) and `/v1/records/duplicate-candidates` (up to 500 records). These functions are implemented and tested; they do not yet have separate public RapidAPI listings. Contact checks are syntax-only, not ownership or deliverability verification. Duplicate detection returns candidates on selected scalar keys and never deletes records. Payload limit is 1 MB.
+The same backend serves [VN Contact Cleaner](https://rapidapi.com/tuyentn23/api/vn-contact-cleaner), `/v1/contacts/normalize` (up to 200 contacts), and [Batch Duplicate Candidates](https://rapidapi.com/tuyentn23/api/batch-duplicate-candidates), `/v1/records/duplicate-candidates` (up to 500 records). Both listings are public. Contact checks are syntax-only, not ownership or deliverability verification. Duplicate detection returns candidates on selected scalar keys and never deletes records. Payload limit is 1 MB.
 
-Read the [Contact Cleaner guide](listing/CONTACTS.md) and [Duplicate Candidates guide](listing/DUPLICATES.md). Separate marketplace drafts have been prepared; publication is pending the provider's rights confirmation. The specifications include synthetic examples for invalid contacts, missing fields and skipped duplicate keys.
+Read the [Contact Cleaner guide](listing/CONTACTS.md) and [Duplicate Candidates guide](listing/DUPLICATES.md). Each listing offers BASIC 100 batch requests/month and PRO $4.99 for 5,000 batch requests/month with hard limits. The specifications include synthetic examples for invalid contacts, missing fields and skipped duplicate keys.
 
 ## Hosting and monitoring
 
