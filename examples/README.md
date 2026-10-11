@@ -2,7 +2,17 @@
 
 1. Subscribe to BASIC on [Invoice Arithmetic Validator](https://rapidapi.com/tuyentn23/api/invoice-arithmetic-validator).
 2. Choose **Validate invoice arithmetic** and run the supplied example. A correct example returns `valid: true`. Change total from 110 to 120 to get a field-level mismatch.
-3. For the extractor pipeline, also subscribe to [Invoice to JSON Extractor](https://rapidapi.com/tuyentn23/api/invoice-to-json-extractor1). Set your own `RAPIDAPI_KEY` in the environment.
+3. To try the validator alone, set your own `RAPIDAPI_KEY` in your terminal or secret manager, then run the standard-library example:
+
+```powershell
+python examples/validate_invoice.py --case correct
+python examples/validate_invoice.py --case wrong-total
+python examples/validate_invoice.py --case wrong-line
+```
+
+Each command sends one synthetic invoice and consumes one request from your plan. Expected results are `valid: true` with total `0.30`, a total mismatch with expected `110`, and a line mismatch with expected `16`, respectively. Use `--preview` to inspect input without a key or request. No provider secret is needed. Free hosting can have cold starts; the example allows up to 90 seconds and does not automatically send repeated requests.
+
+For the extractor pipeline, also subscribe to [Invoice to JSON Extractor](https://rapidapi.com/tuyentn23/api/invoice-to-json-extractor1).
 
 ```powershell
 python examples/extract_then_validate.py examples/sample_invoice.txt --shipping 0 --discount 0

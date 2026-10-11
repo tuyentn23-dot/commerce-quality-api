@@ -39,9 +39,11 @@ Expected: `valid: false`, issue for `lines[0].line_total`, expected `16`.
 
 Subscribe to BASIC, copy the RapidAPI request example from the endpoint page, and replace the request body with one of the examples above. Consumer authentication uses your RapidAPI key. The backend proxy secret is managed by the provider and is never needed by consumers.
 
-## Suggested initial plans
+## Published plans
 
 - BASIC: $0, 100 requests/month, hard limit, no overage.
 - PRO: $4.99/month, 5,000 requests/month, hard limit, no overage.
 
-One request checks one invoice, including up to 200 lines. Pricing is an initial experiment, not a demand forecast. The listing is not public until the proxy path has passed smoke tests.
+One request checks one invoice, including up to 200 lines. The listing is public and the RapidAPI proxy path has passed a synthetic smoke test. The current backend uses Render Free: cold starts are possible and there is no uptime SLA. Pricing is an initial experiment, not a demand forecast.
+
+A standalone Python example and inactive n8n template are available in the [examples folder](https://github.com/tuyentn23-dot/commerce-quality-api/tree/main/examples). The Python example uses your own RapidAPI key; the provider proxy secret is never needed.
