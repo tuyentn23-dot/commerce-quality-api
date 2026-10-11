@@ -1,0 +1,55 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mô phỏng nhập hàng min/max | TNT</title><meta name="description" content="Tính tồn dự kiến và số lượng đề xuất theo ngưỡng min/max, làm tròn theo số lượng mỗi kiện."><link rel="canonical" href="https://commerce-quality-api.onrender.com/inventory-min-max-preview"><style>body{font:17px/1.6 system-ui;background:#f5f7fb;color:#172b4d;margin:0}main{max-width:1000px;margin:auto;padding:24px}section{background:white;padding:24px;border-radius:12px;margin:20px 0}textarea{box-sizing:border-box;width:100%;height:230px;font:14px/1.5 monospace;padding:12px}button{background:#175cd3;color:white;border:0;border-radius:6px;padding:12px;margin:8px 8px 8px 0;font:inherit;cursor:pointer}button:disabled{background:#68758c}pre{white-space:pre-wrap;overflow-wrap:anywhere}a{color:#1454ba}</style></head><body><main><a href="/">Danh mục TNT</a><h1>Mô phỏng nhập hàng min/max</h1><p>Tính tồn dự kiến và số lượng đề xuất theo ngưỡng min/max, làm tròn theo số lượng mỗi kiện.</p><p>Dành cho: Kho nhỏ và đội chuẩn bị dữ liệu nhập ERP. Bản đánh giá miễn phí, chưa có gói API trả phí.</p><section><h2>Thử ngay</h2><p>Dữ liệu được xử lý tại trình duyệt, không gửi lên máy chủ, không tự lưu. Không cần tài khoản. Tối đa 1 MB; 500 dòng (múi giờ: 30 dòng).</p><button id="sample">Nạp dữ liệu mẫu</button><label for="input">Dữ liệu JSON</label><textarea id="input" spellcheck="false"></textarea><button id="run">Kiểm tra dữ liệu</button><button id="clear">Xóa dữ liệu</button><button id="download" disabled>Tải báo cáo JSON</button><p id="status" role="status">Chưa có kết quả.</p><pre id="result"></pre></section><section><h2>Hiểu đúng kết quả</h2><p>Chỉ số lượng nguyên đã nhập. Không dự báo nhu cầu, lead time, tối ưu vốn, đặt mua hoặc kết nối kho thực tế. Đơn vị phải đồng nhất.</p><p>Odoo có reordering rules đầy đủ; bản thử là sandbox không cần ERP để xem lại quy tắc và số lượng.</p><p><a href="https://www.odoo.com/documentation/master/applications/inventory_and_mrp/inventory/warehouses_storage/replenishment/reordering_rules.html" rel="noreferrer">Nguồn quy tắc và giải pháp hiện có</a> — đối chiếu ngày 11/10/2026. Nguồn xác nhận bài toán/quy tắc, chưa xác nhận nhu cầu trả phí cho TNT.</p><p>Mỗi dòng có index bắt đầu từ 0. Dòng lỗi có error; hãy sửa dữ liệu rồi chạy lại. Chỉ dùng dữ liệu mẫu hoặc đã loại thông tin riêng tư khi đánh giá.</p><p><a href="https://rapidapi.com/tuyentn23/api/invoice-arithmetic-validator">API kiểm tra phép tính hóa đơn đang bán</a> · <a href="/market-lab">Xem 5 sản phẩm thử và tiêu chí đánh giá</a></p></section><noscript>Cần JavaScript để dùng bản thử.</noscript></main><script>'use strict';
+function runTool(kind, rows) {
+  if(!Array.isArray(rows)||rows.length<1||rows.length>(kind==='timezone'?30:500))throw Error('Cần mảng 1–500 dòng; múi giờ tối đa 30 dòng.');
+  const str=(x,max=2000)=>{if(typeof x!=='string'||x.length>max)throw Error('Trường văn bản không hợp lệ.');return x;};
+  const int=x=>{if(!Number.isSafeInteger(x)||Math.abs(x)>100000000)throw Error('Số lượng phải là số nguyên trong ±100 triệu.');return x;};
+  return rows.map((r,index)=>{try{
+    if(kind==='gtin'){
+      const code=str(r,14);if(!/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(code))throw Error('GTIN phải là chuỗi 8/12/13/14 chữ số.');
+      let sum=0;for(let i=code.length-2,n=0;i>=0;i--,n++)sum+=Number(code[i])*(n%2?1:3);
+      const expected=String((10-sum%10)%10);
+      return {index,code,checksum_matches:code.at(-1)===expected,expected_check_digit:expected,allocation_verified:false};
+    }
+    if(kind==='utm'){
+      const raw=str(r);const u=new URL(raw);if(!['https:','http:'].includes(u.protocol)||u.username||u.password)throw Error('Chỉ nhận URL HTTP(S) không chứa tài khoản.');
+      const issues=[];for(const key of ['utm_source','utm_medium','utm_campaign']){const values=u.searchParams.getAll(key);if(!values.length||values.some(v=>!v.trim()))issues.push('missing_or_empty:'+key);if(values.length>1)issues.push('duplicate:'+key);}
+      for(const [k,v] of u.searchParams){if(k.toLowerCase().startsWith('utm_')&&k!==k.toLowerCase())issues.push('parameter_case:'+k);if(k.startsWith('utm_')&&(v!==v.trim()||v!==v.toLowerCase()))issues.push('review_value_case_or_spaces:'+k);}
+      if(u.hash.includes('utm_'))issues.push('utm_in_fragment');
+      return {index,url:raw,issues,tracking_delivery_verified:false};
+    }
+    if(kind==='csv-risk'){
+      if(!Array.isArray(r)||r.length>100)throw Error('Mỗi dòng là mảng tối đa 100 ô văn bản.');
+      const risks=[];r.forEach((v,column)=>{str(v,10000);if(/^[\t\r\n]/.test(v)||/^[\s\uFEFF]*[=+@\-＝＋＠－]/u.test(v))risks.push({column,reason:'potential_formula_prefix'});});
+      return {index,flagged_cells:risks,scan_scope:'parsed_cells_only',spreadsheet_safety_guaranteed:false};
+    }
+    if(kind==='reorder'){
+      if(!r||typeof r!=='object'||Array.isArray(r))throw Error('Dòng phải là đối tượng.');
+      const sku=str(r.sku,100);if(!sku.trim())throw Error('Thiếu SKU.');
+      const on=int(r.on_hand),incoming=int(r.incoming),out=int(r.committed),min=int(r.minimum),max=int(r.maximum),pack=int(r.pack);
+      if(incoming<0||out<0||min<0||max<min||pack<1)throw Error('Quy tắc min/max/pack không hợp lệ.');
+      const forecast=on+incoming-out,quantity=forecast<min?Math.ceil((max-forecast)/pack)*pack:0;
+      return {index,sku,forecast,proposed_quantity:quantity,above_max_after_pack:quantity>0&&forecast+quantity>max,automatic_order_created:false,scope:'supplied_counts_no_demand_forecast'};
+    }
+    if(kind==='timezone'){
+      const local=str(r.local,16),zone=str(r.zone,100);
+      if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(local))throw Error('Giờ dạng YYYY-MM-DDTHH:mm.');
+      const [y,m,d,h,mi]=local.match(/\d+/g).map(Number);if(y<2000||y>2035)throw Error('Chỉ hỗ trợ 2000–2035.');
+      const wall=Date.UTC(y,m-1,d,h,mi);if(new Date(wall).toISOString().slice(0,16)!==local)throw Error('Ngày hoặc giờ không tồn tại.');
+      const f=new Intl.DateTimeFormat('en-CA',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+      const parts=t=>Object.fromEntries(f.formatToParts(new Date(t)).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));
+      const offsets=new Set();for(let step=-48;step<=48;step+=6){const t=wall+step*3600000,p=parts(t);offsets.add(Date.UTC(+p.year,+p.month-1,+p.day,+p.hour,+p.minute)-t);}
+      const matches=[];for(const off of offsets){const t=wall-off,p=parts(t);if(`${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`===local)matches.push(new Date(t).toISOString());}
+      matches.sort();return {index,local,zone,status:matches.length===0?'nonexistent':matches.length>1?'ambiguous':'unique',utc_candidates:matches,time_zone_rules:'browser Intl; sample offsets; not historical certification'};
+    }
+    throw Error('Sản phẩm không tồn tại.');
+  }catch(e){return {index,error:e.message};}});
+}
+if(typeof module!=='undefined')module.exports={runTool};
+
+const kind="reorder",sample=[{"sku":"DEMO-A","on_hand":8,"incoming":0,"committed":3,"minimum":10,"maximum":25,"pack":6},{"sku":"DEMO-B","on_hand":10,"incoming":0,"committed":0,"minimum":10,"maximum":25,"pack":1}];
+const input=document.getElementById('input'),status=document.getElementById('status'),result=document.getElementById('result'),download=document.getElementById('download');let last=null;
+function reset(){last=null;result.textContent='';status.textContent='Chưa có kết quả.';download.disabled=true;}
+input.addEventListener('input',reset);document.getElementById('sample').onclick=()=>{reset();input.value=JSON.stringify(sample,null,2);};document.getElementById('clear').onclick=()=>{reset();input.value='';};
+document.getElementById('run').onclick=()=>{reset();try{if(new TextEncoder().encode(input.value).length>1000000)throw Error('Vượt giới hạn 1 MB.');last=runTool(kind,JSON.parse(input.value));result.textContent=JSON.stringify(last,null,2);const errors=last.filter(x=>x.error).length;status.textContent='Đã kiểm tra '+last.length+' dòng; '+errors+' dòng không xử lý được. Xem kết quả và giới hạn bên dưới.';download.disabled=false;}catch(e){status.textContent='Không xử lý được: '+(e instanceof SyntaxError?'JSON không hợp lệ.':e.message);}};
+download.onclick=()=>{if(!last)return;const u=URL.createObjectURL(new Blob([JSON.stringify(last,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=u;a.download=kind+'-review.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);};
+</script></body></html>
