@@ -10,8 +10,10 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.8
-      - key: RAPIDAPI_PROXY_SECRET
+      - key: TNT_GATEWAY_TOKEN
         sync: false
+      - key: RAPIDAPI_PROXY_HEADER
+        value: X-TNT-Proxy-Secret
       - key: ADMIN_TOKEN
         generateValue: true
       - key: METRICS_HASH_SECRET

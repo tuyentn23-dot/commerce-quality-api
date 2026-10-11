@@ -88,5 +88,15 @@ class QualityTests(unittest.TestCase):
         response = self.client.post('/v1/invoices/validate', content=b'x' * 1_000_001, headers=self.headers)
         self.assertEqual(response.status_code, 413)
 
+    def test_redacted_placeholder_never_authenticates(self):
+        with patch.dict(os.environ, {'RAPIDAPI_PROXY_SECRET': '<redacted>', 'TNT_GATEWAY_TOKEN': '<redacted>'}):
+            self.assertEqual(self.post('/v1/invoices/validate', {}).status_code, 503)
+
+    def test_configured_gateway_header(self):
+        with patch.dict(os.environ, {'TNT_GATEWAY_TOKEN': 'custom-gateway-token', 'RAPIDAPI_PROXY_HEADER': 'X-TNT-Proxy-Secret'}):
+            response = self.client.post('/v1/invoices/validate', json={'subtotal': '1', 'total': '1'}, headers={'X-TNT-Proxy-Secret': 'custom-gateway-token'})
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(response.json()['valid'])
+
 if __name__ == '__main__':
     unittest.main()
