@@ -1,0 +1,4 @@
+carrier,tracking_id,currency,expected_net
+demo,A,VND,90000
+demo,B,VND,100000
+demo,C,VND,50000

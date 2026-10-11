@@ -12,6 +12,16 @@ python cli.py sample.json
 
 The synthetic example returns one matched shipment, one observed shortfall of VND 20,000, one missing settlement and one settlement without an order. Output is printed locally; the tool does not upload input or write a customer-data database.
 
+## Compare normalized CSV files
+
+```text
+python csv_cli.py sample_orders.csv sample_settlements.csv
+```
+
+Use UTF-8 (BOM accepted), comma-separated CSV. Orders need exactly `carrier,tracking_id,currency,expected_net`; settlements need exactly `carrier,tracking_id,currency,settlement_id,net_received`. Header order may differ. Duplicate/unknown headers and missing/extra cells are rejected. Combined files must be at most 1 MB, with the same row limits as JSON. Amounts stay decimal strings; thousands separators and comma decimals are rejected rather than guessed.
+
+This is an adapter for **our normalized CSV schema**, not a reader for arbitrary Haravan/GHN/carrier exports. Map and review expected net and settlement meanings first. JSON results are printed locally; sample files contain synthetic data only.
+
 ## Contract
 
 Top-level `orders` (1–500 rows), `settlements` (0–1,000 rows), optional `tolerance` (decimal string 0–1; default `"0"`). File/request limit: 1 MB. Unknown fields are rejected.

@@ -1,0 +1,5 @@
+carrier,tracking_id,currency,settlement_id,net_received
+demo,A,VND,S1,60000
+demo,A,VND,S2,30000
+demo,B,VND,S3,80000
+demo,D,VND,S4,20000
