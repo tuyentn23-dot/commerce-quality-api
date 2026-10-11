@@ -11,14 +11,29 @@
         "tags": [
           "Invoice Arithmetic Validator"
         ],
-        "summary": "Validate Invoice",
+        "summary": "Validate invoice arithmetic",
         "description": "Check arithmetic of supplied values; does not validate tax law or invoice authenticity.",
-        "operationId": "validate_invoice_v1_invoices_validate_post",
+        "operationId": "validateInvoiceArithmetic",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/InvoiceCheck"
+              },
+              "example": {
+                "subtotal": "100",
+                "tax": "10",
+                "shipping": "0",
+                "discount": "0",
+                "total": "110",
+                "tolerance": "0.01",
+                "lines": [
+                  {
+                    "quantity": "2",
+                    "unit_price": "50",
+                    "line_total": "100"
+                  }
+                ]
               }
             }
           },
@@ -29,7 +44,38 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "valid",
+                    "expected_total",
+                    "issues",
+                    "scope"
+                  ],
+                  "properties": {
+                    "valid": {
+                      "type": "boolean"
+                    },
+                    "expected_total": {
+                      "type": "string"
+                    },
+                    "issues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "scope": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "valid": true,
+                  "expected_total": "110",
+                  "issues": [],
+                  "scope": "arithmetic_only"
+                }
               }
             }
           },
@@ -137,81 +183,44 @@
       "InvoiceCheck": {
         "properties": {
           "subtotal": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0.0
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "title": "Subtotal"
+            "title": "Subtotal",
+            "type": "string",
+            "pattern": "^\\d+(?:\\.\\d{1,6})?$",
+            "example": "1.00"
           },
           "tax": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0.0
-              },
-              {
-                "type": "string"
-              }
-            ],
             "title": "Tax",
-            "default": "0"
+            "default": "0",
+            "type": "string",
+            "pattern": "^\\d+(?:\\.\\d{1,6})?$",
+            "example": "1.00"
           },
           "shipping": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0.0
-              },
-              {
-                "type": "string"
-              }
-            ],
             "title": "Shipping",
-            "default": "0"
+            "default": "0",
+            "type": "string",
+            "pattern": "^\\d+(?:\\.\\d{1,6})?$",
+            "example": "1.00"
           },
           "discount": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0.0
-              },
-              {
-                "type": "string"
-              }
-            ],
             "title": "Discount",
-            "default": "0"
+            "default": "0",
+            "type": "string",
+            "pattern": "^\\d+(?:\\.\\d{1,6})?$",
+            "example": "1.00"
           },
           "total": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0.0
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "title": "Total"
+            "title": "Total",
+            "type": "string",
+            "pattern": "^\\d+(?:\\.\\d{1,6})?$",
+            "example": "1.00"
           },
           "tolerance": {
-            "anyOf": [
-              {
-                "type": "number",
-                "maximum": 1.0,
-                "minimum": 0.0
-              },
-              {
-                "type": "string"
-              }
-            ],
             "title": "Tolerance",
-            "default": "0.01"
+            "default": "0.01",
+            "type": "string",
+            "pattern": "^\\d+(?:\\.\\d{1,6})?$",
+            "example": "1.00"
           },
           "lines": {
             "items": {
@@ -233,41 +242,22 @@
       "Line": {
         "properties": {
           "quantity": {
-            "anyOf": [
-              {
-                "type": "number",
-                "exclusiveMinimum": true,
-                "minimum": 0.0
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "title": "Quantity"
+            "title": "Quantity",
+            "type": "string",
+            "pattern": "^\\d+(?:\\.\\d{1,6})?$",
+            "example": "1.00"
           },
           "unit_price": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0.0
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "title": "Unit Price"
+            "title": "Unit Price",
+            "type": "string",
+            "pattern": "^\\d+(?:\\.\\d{1,6})?$",
+            "example": "1.00"
           },
           "line_total": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0.0
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "title": "Line Total"
+            "title": "Line Total",
+            "type": "string",
+            "pattern": "^\\d+(?:\\.\\d{1,6})?$",
+            "example": "1.00"
           }
         },
         "additionalProperties": false,
@@ -312,19 +302,6 @@
         ],
         "title": "ValidationError"
       }
-    },
-    "securitySchemes": {
-      "RapidAPIProxy": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "X-RapidAPI-Proxy-Secret",
-        "description": "Provider-side proxy credential. Configure at RapidAPI; consumers use their own RapidAPI key."
-      }
     }
-  },
-  "security": [
-    {
-      "RapidAPIProxy": []
-    }
-  ]
+  }
 }

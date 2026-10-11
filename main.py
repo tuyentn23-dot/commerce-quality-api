@@ -92,8 +92,8 @@ async def guard(request: Request, call_next):
     if path == '/health':
         return await call_next(request)
     secret = os.getenv('ADMIN_TOKEN' if path == '/metrics' else 'RAPIDAPI_PROXY_SECRET', '')
-    supplied = request.headers.get('Authorization', '') if path == '/metrics' else request.headers.get('X-RapidAPI-Proxy-Secret', '')
-    if not secret:
+    supplied = request.headers.get('Authorization', '') if path == '/metrics' else request.headers.get(os.getenv('RAPIDAPI_PROXY_HEADER', 'X-RapidAPI-Proxy-Secret'), '')
+    if not secret or secret in ('<redacted>', '[redacted]'):
         return JSONResponse({'detail': 'Service authentication not configured'}, status_code=503)
     expected = 'Bearer ' + secret if path == '/metrics' else secret
     if not hmac.compare_digest(supplied.encode(), expected.encode()):
