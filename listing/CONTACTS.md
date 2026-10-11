@@ -14,6 +14,8 @@ This is syntax-only preflight. It does not check carrier allocation, active serv
 
 Subscribe to BASIC and run the supplied playground example with your own RapidAPI key. A provider secret is never needed. You may test with synthetic contact data.
 
-Proposed launch plans: BASIC $0 / 100 batch requests per month; PRO $4.99 / 5,000 batch requests per month, hard limits. A request is a batch, not a contact; up to 200 contacts in each request. Confirm the live pricing page before subscribing. RapidAPI displays its standard bandwidth fee separately.
+Published launch plans: BASIC $0 / 100 batch requests per month; PRO $4.99 / 5,000 batch requests per month, hard limits. A request is a batch, not a contact; up to 200 contacts in each request. Confirm the live pricing page before subscribing. RapidAPI displays its standard bandwidth fee separately.
 
 Hosted on Render Free: cold starts are possible and there is no uptime SLA. This initial experiment offers convenience for HTTP workflows, not a guarantee of accuracy, customers or revenue.
+
+[Request/response examples and workflow guide](https://commerce-quality-api.onrender.com/vn-contact-cleaner)

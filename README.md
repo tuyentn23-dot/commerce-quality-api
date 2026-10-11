@@ -52,3 +52,12 @@ uvicorn main:app --host 127.0.0.1 --port 8010
 - Public visibility verified after page reload on 11 October 2026.
 
 These checks demonstrate behavior and configuration, not customer demand or revenue.
+
+## Workflow guides and examples
+
+- [Compare all APIs for invoice and CRM imports](https://commerce-quality-api.onrender.com/)
+- [Invoice arithmetic validation: totals, rounding and OCR mapping](https://commerce-quality-api.onrender.com/invoice-arithmetic-validator)
+- [Vietnam phone +84 and email syntax normalization](https://commerce-quality-api.onrender.com/vn-contact-cleaner)
+- [Exact duplicate candidates for JSON batches and compound keys](https://commerce-quality-api.onrender.com/batch-duplicate-candidates)
+
+These guides include synthetic request/response examples, bounds and limitations. Static guides are public; business requests still require the RapidAPI gateway and metrics still require the administrator token.

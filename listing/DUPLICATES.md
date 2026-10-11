@@ -19,6 +19,8 @@ This checks only records in the submitted batch, not existing CRM data. It does 
 
 Subscribe to BASIC and run the synthetic example using your own RapidAPI key. Provider proxy secrets are managed by the provider.
 
-Proposed launch plans: BASIC $0 / 100 batch requests per month; PRO $4.99 / 5,000 batch requests per month, hard limits. Each request can contain up to 500 records; a record is not a request. Confirm the live pricing page before subscribing. RapidAPI displays its standard bandwidth fee separately.
+Published launch plans: BASIC $0 / 100 batch requests per month; PRO $4.99 / 5,000 batch requests per month, hard limits. Each request can contain up to 500 records; a record is not a request. Confirm the live pricing page before subscribing. RapidAPI displays its standard bandwidth fee separately.
 
 Hosted on Render Free with possible cold starts and no uptime SLA. This is an initial convenience experiment for HTTP automation and import review, not an alternative to a CRM's existing record database.
+
+[Request/response examples and workflow guide](https://commerce-quality-api.onrender.com/batch-duplicate-candidates)

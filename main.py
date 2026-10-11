@@ -12,10 +12,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Annotated, Any
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
 
-app = FastAPI(title='Commerce Data Quality API', version='0.1.0', description='Invoice arithmetic checks, contact syntax normalization, and exact duplicate candidates. No live identity verification. No customer payloads are stored.')
+app = FastAPI(title='Commerce Data Quality API', version='0.1.1', description='Invoice arithmetic checks, contact syntax normalization, and exact duplicate candidates. No live identity verification. No customer payloads are stored.')
+PUBLIC_PAGES = {'/': 'index.html', '/invoice-arithmetic-validator': 'invoice-arithmetic-validator.html', '/vn-contact-cleaner': 'vn-contact-cleaner.html', '/batch-duplicate-candidates': 'batch-duplicate-candidates.html'}
+PUBLIC_PATHS = frozenset(PUBLIC_PAGES) | {'/health', '/robots.txt', '/sitemap.xml'}
 DB_PATH = Path(os.getenv('METRICS_DB', str(Path(__file__).with_name('usage.sqlite3'))))
 DB_LOCK = threading.Lock()
 STARTED_AT = datetime.now(timezone.utc).isoformat()
@@ -89,7 +91,7 @@ def metrics_snapshot():
 @app.middleware('http')
 async def guard(request: Request, call_next):
     path = request.url.path
-    if path == '/health':
+    if path in PUBLIC_PATHS:
         return await call_next(request)
     secret = os.getenv('ADMIN_TOKEN', '') if path == '/metrics' else os.getenv('TNT_GATEWAY_TOKEN', os.getenv('RAPIDAPI_PROXY_SECRET', ''))
     supplied = request.headers.get('Authorization', '') if path == '/metrics' else request.headers.get(os.getenv('RAPIDAPI_PROXY_HEADER', 'X-RapidAPI-Proxy-Secret'), '')
@@ -114,6 +116,26 @@ async def guard(request: Request, call_next):
 @app.get('/health', include_in_schema=False)
 def health():
     return {'ok': True, 'version': app.version, 'process_started_at': STARTED_AT}
+
+
+def public_page(request: Request):
+    filename = PUBLIC_PAGES[request.url.path]
+    return HTMLResponse((Path(__file__).parent / 'public' / filename).read_text(encoding='utf-8'))
+
+
+for public_path in PUBLIC_PAGES:
+    app.add_api_route(public_path, public_page, methods=['GET'], include_in_schema=False, response_class=HTMLResponse)
+
+
+@app.get('/robots.txt', include_in_schema=False)
+def robots():
+    return Response('User-agent: *\nAllow: /\nDisallow: /v1/\nDisallow: /metrics\nDisallow: /docs\nDisallow: /redoc\nDisallow: /openapi.json\nSitemap: https://commerce-quality-api.onrender.com/sitemap.xml\n', media_type='text/plain')
+
+
+@app.get('/sitemap.xml', include_in_schema=False)
+def sitemap():
+    urls = ''.join('<url><loc>https://commerce-quality-api.onrender.com' + path + '</loc></url>' for path in PUBLIC_PAGES)
+    return Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + urls + '</urlset>', media_type='application/xml')
 
 
 @app.get('/metrics', include_in_schema=False)

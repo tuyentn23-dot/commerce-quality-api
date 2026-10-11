@@ -1,0 +1,37 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vietnam phone and email normalization API | TNT APIs</title><meta name="description" content="Normalize Vietnamese mobile numbers to +84 and check conservative email syntax in batches of up to 200 contacts. Try VN Contact Cleaner on RapidAPI."><link rel="canonical" href="https://commerce-quality-api.onrender.com/vn-contact-cleaner"><meta property="og:title" content="Vietnam phone and email normalization API"><meta property="og:description" content="Normalize Vietnamese mobile numbers to +84 and check conservative email syntax in batches of up to 200 contacts. Try VN Contact Cleaner on RapidAPI."><meta property="og:url" content="https://commerce-quality-api.onrender.com/vn-contact-cleaner"><meta property="og:type" content="website"><style>body{margin:0;background:#f6f8fc;color:#18253c;font:17px/1.7 system-ui,sans-serif}main{max-width:920px;margin:auto;padding:36px 22px}nav a{margin-right:18px}a{color:#1454ba}h1{font-size:clamp(30px,5vw,44px);line-height:1.2}h2{margin-top:36px}pre{background:#14233d;color:#edf4ff;padding:20px;overflow:auto;border-radius:12px;font-size:14px}section{background:white;border:1px solid #dfe5ef;border-radius:16px;padding:24px;margin:20px 0}.cta{display:inline-block;background:#175cd3;color:white;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:650}footer{border-top:1px solid #ccd6e4;margin-top:40px;padding-top:20px;font-size:14px}.note{color:#47566d}li{margin:8px 0}code{overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}td,th{padding:10px;text-align:left;border-bottom:1px solid #ddd}</style><script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "name": "Vietnam phone and email normalization API", "description": "Normalize Vietnamese mobile numbers to +84 and check conservative email syntax in batches of up to 200 contacts. Try VN Contact Cleaner on RapidAPI.", "url": "https://commerce-quality-api.onrender.com/vn-contact-cleaner", "about": {"@type": "WebAPI", "name": "vn-contact-cleaner", "url": "https://rapidapi.com/tuyentn23/api/vn-contact-cleaner", "documentation": "https://commerce-quality-api.onrender.com/vn-contact-cleaner"}}</script></head><body><main><nav><a href="/">All APIs</a><a href="/invoice-arithmetic-validator">Invoice checks</a><a href="/vn-contact-cleaner">Vietnam contacts</a><a href="/batch-duplicate-candidates">Duplicate candidates</a></nav><h1>Vietnam phone and email normalization API</h1><p class="note">Normalize Vietnamese mobile numbers to +84 and check conservative email syntax in batches of up to 200 contacts. Try VN Contact Cleaner on RapidAPI.</p><p><a class="cta" href="https://rapidapi.com/tuyentn23/api/vn-contact-cleaner">Try the free BASIC plan on RapidAPI</a></p><p>Prepare contact data before a Vietnam CRM or order import. Submit 1–200 contacts in one HTTP request, up to 1 MB. Results preserve input order: <code>results[i]</code> describes <code>contacts[i]</code>.</p><h2>How Vietnamese mobile numbers are normalized</h2><p>Accepted number shapes start with 0, +84, 0084 or bare 84. Spaces, parentheses, dots and hyphens are removed. A supported ten-digit local mobile shape such as <code>0912345678</code> becomes <code>+84912345678</code>. Landlines, extensions and old eleven-digit local numbers are unsupported.</p><h2>Email case and invalid fields</h2><p>The email domain is lowercased and IDN-encoded; local-part case is preserved. Outer whitespace is trimmed. Invalid supplied values return false validity and null normalized values; omitted values return null validity. This conservative ASCII local-part syntax check does not support every RFC email address.</p><p>A valid shape does not mean a number is allocated or reachable. This API does not verify mailboxes, deliverability, consent or ownership. Use a verification provider if you need live checks.</p><h2>Chuẩn hóa số điện thoại Việt Nam</h2><p>Dùng trước khi nhập danh sách vào CRM: chuyển số di động đúng định dạng sang +84 và báo trường thiếu hoặc sai cú pháp. Kết quả không xác nhận thuê bao đang hoạt động hay email tồn tại.</p><h2>Request example</h2><p>Set <code>RAPIDAPI_KEY</code> to your own consumer key. Copy the host from your RapidAPI playground if your subscription shows a different host. No provider secret is needed. This example uses a POSIX shell.</p><pre><code>curl --request POST \
+  --url &#x27;https://vn-contact-cleaner.p.rapidapi.com/v1/contacts/normalize&#x27; \
+  --header &#x27;Content-Type: application/json&#x27; \
+  --header &quot;X-RapidAPI-Key: $RAPIDAPI_KEY&quot; \
+  --header &#x27;X-RapidAPI-Host: vn-contact-cleaner.p.rapidapi.com&#x27; \
+  --data &#x27;{&quot;contacts&quot;:[{&quot;email&quot;:&quot;User@EXAMPLE.COM &quot;,&quot;phone&quot;:&quot;+84 912 345 678&quot;},{&quot;email&quot;:&quot;bad-email&quot;,&quot;phone&quot;:&quot;abc&quot;},{}]}&#x27;</code></pre><h2>Expected synthetic response</h2><pre><code>{
+  &quot;count&quot;: 3,
+  &quot;results&quot;: [
+    {
+      &quot;email&quot;: &quot;User@example.com&quot;,
+      &quot;email_syntax_valid&quot;: true,
+      &quot;phone_e164&quot;: &quot;+84912345678&quot;,
+      &quot;vn_mobile_shape_valid&quot;: true,
+      &quot;scope&quot;: &quot;syntax_only&quot;,
+      &quot;deliverability_verified&quot;: false,
+      &quot;ownership_verified&quot;: false
+    },
+    {
+      &quot;email&quot;: null,
+      &quot;email_syntax_valid&quot;: false,
+      &quot;phone_e164&quot;: null,
+      &quot;vn_mobile_shape_valid&quot;: false,
+      &quot;scope&quot;: &quot;syntax_only&quot;,
+      &quot;deliverability_verified&quot;: false,
+      &quot;ownership_verified&quot;: false
+    },
+    {
+      &quot;email&quot;: null,
+      &quot;email_syntax_valid&quot;: null,
+      &quot;phone_e164&quot;: null,
+      &quot;vn_mobile_shape_valid&quot;: null,
+      &quot;scope&quot;: &quot;syntax_only&quot;,
+      &quot;deliverability_verified&quot;: false,
+      &quot;ownership_verified&quot;: false
+    }
+  ]
+}</code></pre><h2>Free trial and paid plan</h2><p>BASIC: $0/month, 100 requests. PRO: $4.99/month, 5,000 requests. Hard request limits; a batch counts as one request. RapidAPI displays its standard bandwidth fee separately. Check the live pricing page before subscribing.</p><h2>What if a request fails?</h2><p>401: check your RapidAPI key and subscription; do not call the provider backend directly. 413: reduce the payload below 1 MB. 422: check required fields and batch limits. Timeouts can occur during free-hosting cold starts.</p><footer><p>Hosted on Render Free. Cold starts can take 50 seconds or more; no uptime SLA. Review outputs before making changes to accounting or customer records.</p><p><a href="https://github.com/tuyentn23-dot/commerce-quality-api">Source and integration examples</a> · <a href="/health">Server health</a></p></footer></main></body></html>
