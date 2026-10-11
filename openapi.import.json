@@ -97,14 +97,27 @@
         "tags": [
           "VN Contact Cleaner"
         ],
-        "summary": "Contacts",
+        "summary": "Normalize Vietnamese mobile shapes and email syntax",
         "description": "Normalize email domains and Vietnamese mobile shapes, preserving email local-part case.",
-        "operationId": "contacts_v1_contacts_normalize_post",
+        "operationId": "normalizeVNContacts",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ContactBatch"
+              },
+              "example": {
+                "contacts": [
+                  {
+                    "email": "User@EXAMPLE.COM ",
+                    "phone": "+84 912 345 678"
+                  },
+                  {
+                    "email": "bad-email",
+                    "phone": "abc"
+                  },
+                  {}
+                ]
               }
             }
           },
@@ -115,7 +128,39 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {},
+                "example": {
+                  "count": 3,
+                  "results": [
+                    {
+                      "email": "User@example.com",
+                      "email_syntax_valid": true,
+                      "phone_e164": "+84912345678",
+                      "vn_mobile_shape_valid": true,
+                      "scope": "syntax_only",
+                      "deliverability_verified": false,
+                      "ownership_verified": false
+                    },
+                    {
+                      "email": null,
+                      "email_syntax_valid": false,
+                      "phone_e164": null,
+                      "vn_mobile_shape_valid": false,
+                      "scope": "syntax_only",
+                      "deliverability_verified": false,
+                      "ownership_verified": false
+                    },
+                    {
+                      "email": null,
+                      "email_syntax_valid": null,
+                      "phone_e164": null,
+                      "vn_mobile_shape_valid": null,
+                      "scope": "syntax_only",
+                      "deliverability_verified": false,
+                      "ownership_verified": false
+                    }
+                  ]
+                }
               }
             }
           },
@@ -137,14 +182,34 @@
         "tags": [
           "Batch Duplicate Detector"
         ],
-        "summary": "Duplicate Candidates",
+        "summary": "Find exact duplicate candidates on selected keys",
         "description": "Group exact matches on supplied scalar keys. No records are deleted; review candidates.",
-        "operationId": "duplicate_candidates_v1_records_duplicate_candidates_post",
+        "operationId": "findBatchDuplicateCandidates",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DedupeBatch"
+              },
+              "example": {
+                "records": [
+                  {
+                    "order_id": " A-001 "
+                  },
+                  {
+                    "order_id": "A-001"
+                  },
+                  {
+                    "order_id": ""
+                  },
+                  {
+                    "order_id": "B-002"
+                  }
+                ],
+                "key_fields": [
+                  "order_id"
+                ],
+                "casefold": false
               }
             }
           },
@@ -155,7 +220,21 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {},
+                "example": {
+                  "candidate_groups": [
+                    [
+                      0,
+                      1
+                    ]
+                  ],
+                  "candidate_record_count": 2,
+                  "skipped_indices": [
+                    2
+                  ],
+                  "scope": "exact_selected_keys",
+                  "records_deleted": 0
+                }
               }
             }
           },
@@ -383,5 +462,10 @@
         "title": "ValidationError"
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://commerce-quality-api.onrender.com"
+    }
+  ]
 }

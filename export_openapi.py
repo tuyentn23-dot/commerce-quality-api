@@ -58,6 +58,25 @@ invoice['responses']['200']['content']['application/json'] = {
                               'scope': {'type': 'string'}}},
     'example': {'valid': True, 'expected_total': '110', 'issues': [], 'scope': 'arithmetic_only'},
 }
+spec['servers'] = [{'url': 'https://commerce-quality-api.onrender.com'}]
+contact = spec['paths']['/v1/contacts/normalize']['post']
+contact['operationId'] = 'normalizeVNContacts'
+contact['summary'] = 'Normalize Vietnamese mobile shapes and email syntax'
+contact['requestBody']['content']['application/json']['example'] = {'contacts': [
+    {'email': 'User@EXAMPLE.COM ', 'phone': '+84 912 345 678'},
+    {'email': 'bad-email', 'phone': 'abc'}, {}]}
+contact['responses']['200']['content']['application/json']['example'] = {
+    'count': 3, 'results': [
+        {'email': 'User@example.com', 'email_syntax_valid': True, 'phone_e164': '+84912345678', 'vn_mobile_shape_valid': True, 'scope': 'syntax_only', 'deliverability_verified': False, 'ownership_verified': False},
+        {'email': None, 'email_syntax_valid': False, 'phone_e164': None, 'vn_mobile_shape_valid': False, 'scope': 'syntax_only', 'deliverability_verified': False, 'ownership_verified': False},
+        {'email': None, 'email_syntax_valid': None, 'phone_e164': None, 'vn_mobile_shape_valid': None, 'scope': 'syntax_only', 'deliverability_verified': False, 'ownership_verified': False}]}
+duplicate = spec['paths']['/v1/records/duplicate-candidates']['post']
+duplicate['operationId'] = 'findBatchDuplicateCandidates'
+duplicate['summary'] = 'Find exact duplicate candidates on selected keys'
+duplicate['requestBody']['content']['application/json']['example'] = {'records': [
+    {'order_id': ' A-001 '}, {'order_id': 'A-001'}, {'order_id': ''}, {'order_id': 'B-002'}], 'key_fields': ['order_id'], 'casefold': False}
+duplicate['responses']['200']['content']['application/json']['example'] = {
+    'candidate_groups': [[0, 1]], 'candidate_record_count': 2, 'skipped_indices': [2], 'scope': 'exact_selected_keys', 'records_deleted': 0}
 for suffix, path, title in [
     ('import', None, 'Commerce Data Quality API'),
     ('invoice', '/v1/invoices/validate', 'Invoice Arithmetic Validator'),

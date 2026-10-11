@@ -26,6 +26,8 @@ Checks: total = subtotal + tax + shipping - discount; subtotal equals supplied l
 
 The same backend contains `/v1/contacts/normalize` (up to 200 contacts) and `/v1/records/duplicate-candidates` (up to 500 records). These functions are implemented and tested; they do not yet have separate public RapidAPI listings. Contact checks are syntax-only, not ownership or deliverability verification. Duplicate detection returns candidates on selected scalar keys and never deletes records. Payload limit is 1 MB.
 
+Read the [Contact Cleaner guide](listing/CONTACTS.md) and [Duplicate Candidates guide](listing/DUPLICATES.md). Separate marketplace drafts have been prepared; publication is pending the provider's rights confirmation. The specifications include synthetic examples for invalid contacts, missing fields and skipped duplicate keys.
+
 ## Hosting and monitoring
 
 Provider health: https://commerce-quality-api.onrender.com/health

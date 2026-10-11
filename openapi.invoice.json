@@ -303,5 +303,10 @@
         "title": "ValidationError"
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://commerce-quality-api.onrender.com"
+    }
+  ]
 }

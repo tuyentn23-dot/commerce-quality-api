@@ -11,14 +11,34 @@
         "tags": [
           "Batch Duplicate Detector"
         ],
-        "summary": "Duplicate Candidates",
+        "summary": "Find exact duplicate candidates on selected keys",
         "description": "Group exact matches on supplied scalar keys. No records are deleted; review candidates.",
-        "operationId": "duplicate_candidates_v1_records_duplicate_candidates_post",
+        "operationId": "findBatchDuplicateCandidates",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DedupeBatch"
+              },
+              "example": {
+                "records": [
+                  {
+                    "order_id": " A-001 "
+                  },
+                  {
+                    "order_id": "A-001"
+                  },
+                  {
+                    "order_id": ""
+                  },
+                  {
+                    "order_id": "B-002"
+                  }
+                ],
+                "key_fields": [
+                  "order_id"
+                ],
+                "casefold": false
               }
             }
           },
@@ -29,7 +49,21 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {},
+                "example": {
+                  "candidate_groups": [
+                    [
+                      0,
+                      1
+                    ]
+                  ],
+                  "candidate_record_count": 2,
+                  "skipped_indices": [
+                    2
+                  ],
+                  "scope": "exact_selected_keys",
+                  "records_deleted": 0
+                }
               }
             }
           },
@@ -257,5 +291,10 @@
         "title": "ValidationError"
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://commerce-quality-api.onrender.com"
+    }
+  ]
 }
