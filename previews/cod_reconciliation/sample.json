@@ -1,0 +1,14 @@
+{
+  "orders": [
+    {"carrier":"demo","tracking_id":"A","currency":"VND","expected_net":"90000"},
+    {"carrier":"demo","tracking_id":"B","currency":"VND","expected_net":"100000"},
+    {"carrier":"demo","tracking_id":"C","currency":"VND","expected_net":"50000"}
+  ],
+  "settlements": [
+    {"carrier":"demo","tracking_id":"A","currency":"VND","settlement_id":"S1","net_received":"60000"},
+    {"carrier":"demo","tracking_id":"A","currency":"VND","settlement_id":"S2","net_received":"30000"},
+    {"carrier":"demo","tracking_id":"B","currency":"VND","settlement_id":"S3","net_received":"80000"},
+    {"carrier":"demo","tracking_id":"D","currency":"VND","settlement_id":"S4","net_received":"20000"}
+  ],
+  "tolerance":"0"
+}
