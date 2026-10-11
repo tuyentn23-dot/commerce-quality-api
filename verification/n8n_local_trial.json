@@ -1,0 +1,59 @@
+{
+  "checked_at": "2026-10-11T23:43:20.019843+00:00",
+  "exit_code": 0,
+  "all_three_results_verified": true,
+  "results": [
+    {
+      "arithmetic_status": "passed",
+      "next_step": "continue_other_checks",
+      "automatic_payment_authorized": false,
+      "automatic_accounting_post_authorized": false,
+      "validation": {
+        "valid": true,
+        "expected_total": "0.30",
+        "issues": [],
+        "scope": "arithmetic_only"
+      }
+    },
+    {
+      "arithmetic_status": "mismatch",
+      "next_step": "manual_review_required",
+      "automatic_payment_authorized": false,
+      "automatic_accounting_post_authorized": false,
+      "validation": {
+        "valid": false,
+        "expected_total": "110",
+        "issues": [
+          {
+            "field": "total",
+            "expected": "110",
+            "actual": "120",
+            "difference": "10"
+          }
+        ],
+        "scope": "arithmetic_only"
+      }
+    },
+    {
+      "arithmetic_status": "mismatch",
+      "next_step": "manual_review_required",
+      "automatic_payment_authorized": false,
+      "automatic_accounting_post_authorized": false,
+      "validation": {
+        "valid": false,
+        "expected_total": "20",
+        "issues": [
+          {
+            "field": "lines[0].line_total",
+            "expected": "16",
+            "actual": "20"
+          }
+        ],
+        "scope": "arithmetic_only"
+      }
+    }
+  ],
+  "scope": "real n8n CLI; original published Code/HTTP nodes; loopback actual validator function, not RapidAPI gateway",
+  "rapidapi_live_verified": false,
+  "output": "Execution results verified; verbose migration logs omitted"
+}
