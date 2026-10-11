@@ -1,0 +1,67 @@
+{
+  "scope": "synthetic arithmetic examples; expected results verified against local deployed-contract source, not a live gateway audit",
+  "cases": [
+    {
+      "name": "correct",
+      "request": {
+        "subtotal": "0.10",
+        "tax": "0.20",
+        "total": "0.30",
+        "tolerance": "0"
+      },
+      "expected_response": {
+        "valid": true,
+        "expected_total": "0.30",
+        "issues": [],
+        "scope": "arithmetic_only"
+      }
+    },
+    {
+      "name": "wrong-total",
+      "request": {
+        "subtotal": "100",
+        "tax": "10",
+        "total": "120"
+      },
+      "expected_response": {
+        "valid": false,
+        "expected_total": "110",
+        "issues": [
+          {
+            "field": "total",
+            "expected": "110",
+            "actual": "120",
+            "difference": "10"
+          }
+        ],
+        "scope": "arithmetic_only"
+      }
+    },
+    {
+      "name": "wrong-line",
+      "request": {
+        "subtotal": "20",
+        "total": "20",
+        "lines": [
+          {
+            "quantity": "2",
+            "unit_price": "8",
+            "line_total": "20"
+          }
+        ]
+      },
+      "expected_response": {
+        "valid": false,
+        "expected_total": "20",
+        "issues": [
+          {
+            "field": "lines[0].line_total",
+            "expected": "16",
+            "actual": "20"
+          }
+        ],
+        "scope": "arithmetic_only"
+      }
+    }
+  ]
+}
