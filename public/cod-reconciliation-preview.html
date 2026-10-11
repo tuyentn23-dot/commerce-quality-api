@@ -1,0 +1,55 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Thử đối soát COD bằng dữ liệu mẫu | TNT</title><meta name="description" content="So sánh tiền COD ròng bằng JSON ngay trong trình duyệt. Xem chênh lệch, khoản thiếu và mã trùng; dữ liệu đối soát không gửi lên máy chủ."><link rel="canonical" href="https://commerce-quality-api.onrender.com/cod-reconciliation-preview"><style>body{font:17px/1.6 system-ui;background:#f5f7fb;color:#172b4d;margin:0}main{max-width:1100px;margin:auto;padding:28px 20px}section{background:white;padding:22px;border:1px solid #dce2ed;border-radius:12px;margin:18px 0}button{padding:12px 18px;margin:6px 8px 6px 0;border:0;border-radius:7px;background:#175cd3;color:white;font:inherit;cursor:pointer}button:disabled{background:#68758c}textarea{width:100%;height:220px;box-sizing:border-box;font:14px/1.5 monospace;padding:12px}a{color:#1454ba}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;border-bottom:1px solid #ddd;overflow-wrap:anywhere}#message{font-weight:650}.scroll{overflow:auto}label{display:block;margin:12px 0}input{font:inherit;max-width:100%}</style></head><body><main><a href="/">Danh mục TNT</a><h1>Thử đối soát COD ngay trong trình duyệt</h1><p>So sánh tiền ròng dự kiến với khoản đối soát bạn cung cấp. Bản đánh giá miễn phí; API hosted và gói trả phí chưa có.</p>
+<section><h2>1. Bắt đầu bằng dữ liệu mẫu</h2><p>Không cần tài khoản, khóa API hay cài Python. JSON được xử lý trong trình duyệt, không gửi lên máy chủ và không tự lưu dữ liệu.</p><button id="sample" type="button">Nạp dữ liệu mẫu</button><label for="file">Hoặc chọn file JSON theo cấu trúc đã công bố (tối đa 1 MB)</label><input id="file" type="file" accept=".json,application/json"><label for="input">Dữ liệu JSON</label><textarea id="input" spellcheck="false" placeholder="Bấm Nạp dữ liệu mẫu để bắt đầu"></textarea><button id="compare" type="button">So sánh dữ liệu</button><button id="clear" type="button">Xóa dữ liệu</button><button id="download" type="button" disabled>Tải kết quả JSON</button><p id="message" role="status" aria-live="polite">Chưa có kết quả.</p></section>
+<section><h2>2. Kết quả cần kiểm tra</h2><div class="scroll"><table><thead><tr><th>Vận đơn</th><th>Tiền tệ</th><th>Dự kiến ròng</th><th>Khoản nhận đã nhập</th><th>Chênh lệch</th><th>Kết quả</th></tr></thead><tbody id="results"></tbody></table></div><p>Chênh lệch = khoản nhận đã nhập − tiền ròng dự kiến. “Khớp” chỉ nói các số đã nhập khớp; chưa xác nhận tiền về ngân hàng.</p></section>
+<section><h2>3. Hiểu đúng dữ liệu</h2><p>Giới hạn 500 đơn và 1.000 khoản. Đơn dùng carrier, tracking_id, currency, expected_net. Khoản dùng carrier, tracking_id, currency, settlement_id, net_received. Tiền là chuỗi thập phân tối đa 6 chữ số sau dấu chấm; không dùng dấu hàng nghìn. Khớp theo hãng + vận đơn + tiền tệ; không đổi tiền tệ.</p><p>expected_net là tiền ròng bạn đã kiểm tra sau phí/hoàn trả. Không tự tính phí hay đọc mọi mẫu xuất của hãng. Các khoản khác mã được cộng; mã trùng được đánh dấu chưa thể kết luận. Khoản điều chỉnh âm được chấp nhận.</p><p>Thiếu/chênh lệch có thể do dữ liệu thiếu, thanh toán một phần hoặc chưa đến kỳ. Không kết luận nợ quá hạn, lỗi hãng hay gian lận. Không trả tiền hoặc ghi sổ tự động.</p><p><a href="https://github.com/tuyentn23-dot/commerce-quality-api/releases/tag/cod-preview-v0.2.0">Tải công cụ Python JSON/CSV và tài liệu</a> · <a href="https://rapidapi.com/tuyentn23/api/invoice-arithmetic-validator">API kiểm tra phép tính hóa đơn</a></p></section><noscript>Cần JavaScript để chạy bản thử; có thể tải công cụ Python theo liên kết trên.</noscript></main><script>
+function reconcileCOD(body) {
+  const fail = () => { throw new Error('Kiểm tra cấu trúc, số dòng và tiền dạng chuỗi thập phân.'); };
+  const object = v => v !== null && typeof v === 'object' && !Array.isArray(v);
+  const exact = (v, keys) => object(v) && Object.keys(v).length === keys.length && keys.every(k => Object.hasOwn(v,k));
+  const text = v => {if(typeof v !== 'string' || !v.trim() || Array.from(v).length>100) fail(); return v.trim();};
+  const money = (v,signed=false) => {
+    if(typeof v!=='string' || !(signed?/^-?\d{1,12}(?:\.\d{1,6})?$/:/^\d{1,12}(?:\.\d{1,6})?$/).test(v)) fail();
+    const negative=v.startsWith('-'), parts=(negative?v.slice(1):v).split('.');
+    return (BigInt(parts[0])*1000000n+BigInt((parts[1]||'').padEnd(6,'0')))*(negative?-1n:1n);
+  };
+  const decimal = v => {const sign=v<0n?'-':'';v=v<0n?-v:v;const tail=String(v%1000000n).padStart(6,'0').replace(/0+$/,'');return sign+String(v/1000000n)+(tail?'.'+tail:'');};
+  if(!object(body) || Object.keys(body).some(k=>!['orders','settlements','tolerance'].includes(k))) fail();
+  if(!Array.isArray(body.orders)||body.orders.length<1||body.orders.length>500||!Array.isArray(body.settlements)||body.settlements.length>1000) fail();
+  const tolerance=money(body.tolerance===undefined?'0':body.tolerance); if(tolerance>1000000n) fail();
+  const orders=new Map(), payments=new Map(), ids=new Map(), ambiguous=new Set();
+  const key=row=>{const currency=text(row.currency);if(!/^[A-Z]{3}$/.test(currency)) fail();return JSON.stringify([text(row.carrier),text(row.tracking_id),currency]);};
+  const append=(map,k,value)=>{if(!map.has(k))map.set(k,[]);map.get(k).push(value);};
+  body.orders.forEach((row,i)=>{if(!exact(row,['carrier','tracking_id','currency','expected_net']))fail();append(orders,key(row),[i,money(row.expected_net)]);});
+  body.settlements.forEach((row,i)=>{
+    if(!exact(row,['carrier','tracking_id','currency','settlement_id','net_received']))fail();
+    const k=key(row); append(payments,k,[i,money(row.net_received,true)]);
+    append(ids,JSON.stringify([JSON.parse(k)[0],text(row.settlement_id)]),k);
+  });
+  for(const group of ids.values())if(group.length>1)group.forEach(k=>ambiguous.add(k));
+  const results=[],counts={};
+  for(const k of [...new Set([...orders.keys(),...payments.keys()])].sort()){
+    const o=orders.get(k)||[],p=payments.get(k)||[],[carrier,tracking_id,currency]=JSON.parse(k);
+    const r={carrier,tracking_id,currency,order_indices:o.map(x=>x[0]),settlement_indices:p.map(x=>x[0])};
+    if(o.length>1||ambiguous.has(k))Object.assign(r,{status:'ambiguous',expected_net:null,net_received:null,difference:null,reason:'duplicate_order_key_or_settlement_id'});
+    else {
+      const received=p.reduce((sum,row)=>sum+row[1],0n),expected=o.length?o[0][1]:null,difference=expected===null?null:received-expected;
+      const status=expected===null?'orphan_settlement':!p.length?'missing_settlement':(difference<0n?-difference:difference)<=tolerance?'matched':difference<0n?'shortfall_observed':'excess_observed';
+      Object.assign(r,{status,expected_net:expected===null?null:decimal(expected),net_received:decimal(received),difference:difference===null?null:decimal(difference)});
+    }
+    counts[r.status]=(counts[r.status]||0)+1;results.push(r);
+  }
+  return {scope:'supplied_net_amounts_only',results,status_counts:counts,manual_review_required:results.some(r=>r.status!=='matched'),bank_receipt_verified:false,carrier_payment_verified:false,automatic_payment_authorized:false};
+}
+if(typeof module!=='undefined')module.exports={reconcileCOD};
+
+const sampleData={"orders": [{"carrier": "demo", "tracking_id": "A", "currency": "VND", "expected_net": "90000"}, {"carrier": "demo", "tracking_id": "B", "currency": "VND", "expected_net": "100000"}, {"carrier": "demo", "tracking_id": "C", "currency": "VND", "expected_net": "50000"}], "settlements": [{"carrier": "demo", "tracking_id": "A", "currency": "VND", "settlement_id": "S1", "net_received": "60000"}, {"carrier": "demo", "tracking_id": "A", "currency": "VND", "settlement_id": "S2", "net_received": "30000"}, {"carrier": "demo", "tracking_id": "B", "currency": "VND", "settlement_id": "S3", "net_received": "80000"}, {"carrier": "demo", "tracking_id": "D", "currency": "VND", "settlement_id": "S4", "net_received": "20000"}], "tolerance": "0"};
+const labels={matched:'Số nhập khớp',shortfall_observed:'Khoản nhập thấp hơn dự kiến',excess_observed:'Khoản nhập cao hơn dự kiến',missing_settlement:'Chưa có khoản trong dữ liệu',orphan_settlement:'Khoản chưa có đơn',ambiguous:'Mã trùng — cần kiểm tra'};
+const input=document.getElementById('input'),message=document.getElementById('message'),rows=document.getElementById('results'),download=document.getElementById('download');let last=null;
+function reset(){last=null;download.disabled=true;rows.replaceChildren();message.textContent='Chưa có kết quả.';}
+document.getElementById('sample').onclick=()=>{reset();input.value=JSON.stringify(sampleData,null,2);document.getElementById('file').value='';};
+document.getElementById('clear').onclick=()=>{input.value='';document.getElementById('file').value='';reset();};
+input.addEventListener('input',reset);
+document.getElementById('file').onchange=async event=>{reset();input.value='';const file=event.target.files[0];if(!file)return;if(file.size>1000000){message.textContent='File vượt quá 1 MB.';return;}try{input.value=(await file.text()).replace(/^\uFEFF/,'');message.textContent='Đã đọc file trong trình duyệt. Bấm So sánh dữ liệu.';}catch{message.textContent='Không đọc được file.';}};
+document.getElementById('compare').onclick=()=>{reset();try{if(new TextEncoder().encode(input.value).length>1000000)throw Error('Dữ liệu vượt quá 1 MB.');last=reconcileCOD(JSON.parse(input.value));for(const row of last.results){const tr=document.createElement('tr');for(const value of [row.carrier+' / '+row.tracking_id,row.currency,row.expected_net,row.net_received,row.difference,labels[row.status]]){const td=document.createElement('td');td.textContent=value===null?'Chưa thể kết luận':value;tr.appendChild(td);}rows.appendChild(tr);}const matched=last.status_counts.matched||0;message.textContent=matched+'/'+last.results.length+' vận đơn có số nhập khớp. '+(last.manual_review_required?'Có kết quả cần kiểm tra.':'Vẫn cần kiểm tra chứng từ và tiền nhận thực tế.');download.disabled=false;}catch(error){last=null;message.textContent='Không so sánh được. '+(error instanceof SyntaxError?'JSON không hợp lệ.':error.message);}};
+download.onclick=()=>{if(!last)return;const url=URL.createObjectURL(new Blob([JSON.stringify(last,null,2)],{type:'application/json'}));const link=document.createElement('a');link.href=url;link.download='cod-review.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+</script></body></html>

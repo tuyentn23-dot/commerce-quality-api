@@ -16,7 +16,7 @@ from fastapi.responses import JSONResponse, HTMLResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
 
 app = FastAPI(title='Commerce Data Quality API', version='0.1.1', description='Invoice arithmetic checks, contact syntax normalization, and exact duplicate candidates. No live identity verification. No customer payloads are stored.')
-PUBLIC_PAGES = {'/': 'index.html', '/invoice-arithmetic-validator': 'invoice-arithmetic-validator.html', '/vn-contact-cleaner': 'vn-contact-cleaner.html', '/batch-duplicate-candidates': 'batch-duplicate-candidates.html'}
+PUBLIC_PAGES = {'/': 'index.html', '/invoice-arithmetic-validator': 'invoice-arithmetic-validator.html', '/vn-contact-cleaner': 'vn-contact-cleaner.html', '/batch-duplicate-candidates': 'batch-duplicate-candidates.html', '/cod-reconciliation-preview': 'cod-reconciliation-preview.html'}
 PUBLIC_PATHS = frozenset(PUBLIC_PAGES) | {'/health', '/robots.txt', '/sitemap.xml'}
 DB_PATH = Path(os.getenv('METRICS_DB', str(Path(__file__).with_name('usage.sqlite3'))))
 DB_LOCK = threading.Lock()
