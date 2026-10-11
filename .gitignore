@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+.env.local
+usage.sqlite3*
+.pytest_cache/
