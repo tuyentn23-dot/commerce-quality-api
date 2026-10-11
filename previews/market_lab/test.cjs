@@ -1,6 +1,10 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
-const {runTool}=new Function('module',fs.readFileSync(path.join(__dirname,'core.js'),'utf8')+';return module.exports;')({exports:{}});
+const {runTool,parseToolInput}=new Function('module',fs.readFileSync(path.join(__dirname,'core.js'),'utf8')+';return module.exports;')({exports:{}});
 let cases=0;function check(fn){fn();cases++;}
+check(()=>assert.deepEqual(parseToolInput('gtin','036000291452\r\n\n4006381333931'),['036000291452','4006381333931']));
+check(()=>assert.deepEqual(parseToolInput('utm','https://example.com/?utm_source=a\nhttps://example.org/'),['https://example.com/?utm_source=a','https://example.org/']));
+check(()=>assert.deepEqual(parseToolInput('gtin','["01234565"]'),['01234565']));
+check(()=>assert.throws(()=>parseToolInput('reorder','not JSON')));
 check(()=>assert.equal(runTool('gtin',['4006381333931'])[0].checksum_matches,true));
 check(()=>assert.equal(runTool('gtin',['4006381333932'])[0].checksum_matches,false));
 check(()=>assert.equal(runTool('gtin',['036000291452'])[0].checksum_matches,true));

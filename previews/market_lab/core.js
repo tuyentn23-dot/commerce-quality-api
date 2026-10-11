@@ -1,4 +1,9 @@
 'use strict';
+function parseToolInput(kind,text){
+  if(typeof text!=='string')throw Error('Dữ liệu phải là văn bản.');
+  if(['gtin','utm'].includes(kind)&&!text.trimStart().startsWith('['))return text.split(/\r?\n/).map(v=>v.trim()).filter(Boolean);
+  return JSON.parse(text);
+}
 function runTool(kind, rows) {
   if(!Array.isArray(rows)||rows.length<1||rows.length>(kind==='timezone'?30:500))throw Error('Cần mảng 1–500 dòng; múi giờ tối đa 30 dòng.');
   const str=(x,max=2000)=>{if(typeof x!=='string'||x.length>max)throw Error('Trường văn bản không hợp lệ.');return x;};
@@ -44,4 +49,4 @@ function runTool(kind, rows) {
     throw Error('Sản phẩm không tồn tại.');
   }catch(e){return {index,error:e.message};}});
 }
-if(typeof module!=='undefined')module.exports={runTool};
+if(typeof module!=='undefined')module.exports={runTool,parseToolInput};
