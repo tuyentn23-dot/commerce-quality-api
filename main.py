@@ -20,6 +20,7 @@ app = FastAPI(title='Commerce Data Quality API', version='0.1.1', description='I
 app.version = '0.2.0'
 PUBLIC_PAGES = {'/': 'index.html', '/invoice-arithmetic-validator': 'invoice-arithmetic-validator.html', '/vn-contact-cleaner': 'vn-contact-cleaner.html', '/batch-duplicate-candidates': 'batch-duplicate-candidates.html', '/cod-reconciliation-preview': 'cod-reconciliation-preview.html'}
 PUBLIC_PAGES.update({('/'+slug): slug+'.html' for slug in ('market-lab','gtin-batch-checker','utm-campaign-audit','csv-formula-risk-review','timezone-schedule-review','inventory-min-max-preview')})
+PUBLIC_PAGES['/product-feed-preflight']='product-feed-preflight.html'
 PUBLIC_PATHS = frozenset(PUBLIC_PAGES) | {'/health', '/robots.txt', '/sitemap.xml'}
 DB_PATH = Path(os.getenv('METRICS_DB', str(Path(__file__).with_name('usage.sqlite3'))))
 DB_LOCK = threading.Lock()
