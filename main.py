@@ -14,8 +14,10 @@ from typing import Annotated, Any
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, HTMLResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
+from feed_preflight import FeedBatch, review_feed
 
 app = FastAPI(title='Commerce Data Quality API', version='0.1.1', description='Invoice arithmetic checks, contact syntax normalization, and exact duplicate candidates. No live identity verification. No customer payloads are stored.')
+app.version = '0.2.0'
 PUBLIC_PAGES = {'/': 'index.html', '/invoice-arithmetic-validator': 'invoice-arithmetic-validator.html', '/vn-contact-cleaner': 'vn-contact-cleaner.html', '/batch-duplicate-candidates': 'batch-duplicate-candidates.html', '/cod-reconciliation-preview': 'cod-reconciliation-preview.html'}
 PUBLIC_PAGES.update({('/'+slug): slug+'.html' for slug in ('market-lab','gtin-batch-checker','utm-campaign-audit','csv-formula-risk-review','timezone-schedule-review','inventory-min-max-preview')})
 PUBLIC_PATHS = frozenset(PUBLIC_PAGES) | {'/health', '/robots.txt', '/sitemap.xml'}
@@ -117,6 +119,11 @@ async def guard(request: Request, call_next):
 @app.get('/health', include_in_schema=False)
 def health():
     return {'ok': True, 'version': app.version, 'process_started_at': STARTED_AT}
+
+@app.post('/v1/products/feed-preflight', tags=['Product Feed Preflight'])
+def feed_preflight(body: FeedBatch):
+    """Review up to 500 product rows before import. No assignment or platform approval verification."""
+    return review_feed(body)
 
 
 def public_page(request: Request):
