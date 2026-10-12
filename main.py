@@ -74,6 +74,8 @@ def record_usage(path, status, user):
             if secret:
                 digest = hmac.new(secret.encode(), user.encode(), hashlib.sha256).hexdigest()
                 db.execute('INSERT OR IGNORE INTO users VALUES (?)', (digest,))
+                db.execute('CREATE TABLE IF NOT EXISTS endpoint_users (path TEXT, digest TEXT, PRIMARY KEY(path,digest))')
+                db.execute('INSERT OR IGNORE INTO endpoint_users VALUES (?,?)',(path,digest))
 
 
 def metrics_snapshot():
@@ -83,12 +85,16 @@ def metrics_snapshot():
         db.execute('CREATE TABLE IF NOT EXISTS users (digest TEXT PRIMARY KEY)')
         rows = db.execute('SELECT path, requests, errors FROM counters').fetchall()
         users = db.execute('SELECT COUNT(*) FROM users').fetchone()[0]
+        db.execute('CREATE TABLE IF NOT EXISTS endpoint_users (path TEXT, digest TEXT, PRIMARY KEY(path,digest))')
+        endpoint_users = dict(db.execute('SELECT path, COUNT(*) FROM endpoint_users GROUP BY path').fetchall())
     return {'total_requests': sum(r[1] for r in rows), 'total_errors': sum(r[2] for r in rows),
             'counter_scope': 'backend_local_database', 'process_started_at': STARTED_AT,
             'storage_persistence': os.getenv('METRICS_STORAGE_MODE', 'ephemeral'),
             'unique_subscribers': users if os.getenv('METRICS_HASH_SECRET') else None,
             'subscriber_tracking': 'observed_users' if os.getenv('METRICS_HASH_SECRET') else 'not_configured',
-            'endpoint_counts': {r[0]: r[1] for r in rows}}
+            'endpoint_counts': {r[0]: r[1] for r in rows},
+            'endpoint_observed_users': endpoint_users if os.getenv('METRICS_HASH_SECRET') else None,
+            'endpoint_user_scope': 'observed_since_feature_enabled; includes owner; ephemeral; not paid subscribers'}
 
 
 @app.middleware('http')
