@@ -15,6 +15,18 @@ CASES = {
 }
 
 
+def matches_case(result, case):
+    if not isinstance(result, dict) or result.get('scope') != 'arithmetic_only':
+        return False
+    issues = result.get('issues')
+    if not isinstance(issues, list):
+        return False
+    if case == 'correct':
+        return result.get('valid') is True and result.get('expected_total') == '0.30' and issues == []
+    field, expected, actual = ('total', '110', '120') if case == 'wrong-total' else ('lines[0].line_total', '16', '20')
+    return result.get('valid') is False and any(isinstance(issue, dict) and issue.get('field') == field and issue.get('expected') == expected and issue.get('actual') == actual for issue in issues)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--case', choices=CASES, default='correct')
@@ -43,7 +55,10 @@ def main():
         print('Request failed or response was not JSON. Free hosting may need time to wake; retry once later.', file=sys.stderr)
         return 1
     print(json.dumps(result, indent=2, ensure_ascii=False))
-    # A detected arithmetic mismatch is a successful response, not a transport failure.
+    if not matches_case(result, args.case):
+        print('Unexpected synthetic result. Review the response before integrating.', file=sys.stderr)
+        return 1
+    print('Synthetic trial verified; this does not authorize payment or accounting posting.')
     return 0
 
 
