@@ -20,11 +20,11 @@ Checks: total = subtotal + tax + shipping - discount; subtotal equals supplied l
 
 ## Validator-only n8n starter
 
-Already using another extractor? Download [the validator-only starter](examples/n8n_validator_trial.json) and follow [the setup guide](examples/README.md). Subscribe to Validator BASIC only, then select your own Header Auth credential. One manual execution uses three requests: one arithmetic pass and two mismatches. Local input/classification checks passed; real n8n import/execution remains unverified. The workflow never authorizes payment or accounting posting.
+Already using another extractor? Download [the validator-only starter](examples/n8n_validator_trial.json) and follow [the setup guide](examples/README.md). Subscribe to Validator BASIC only, then select your own Header Auth credential. One manual execution uses three requests: one arithmetic pass and two mismatches. The validator-only starter was imported and executed in n8n 2.42.6 against a local synthetic endpoint; three arithmetic cases and review classification passed. Authenticated n8n-to-RapidAPI execution remains unverified. The workflow never authorizes payment or accounting posting.
 
 ## Integrations
 
-[Python pipeline, mapping guide and inactive n8n template](examples/README.md) connect the existing [Invoice Extractor](https://rapidapi.com/tuyentn23/api/invoice-to-json-extractor1) to this validator. Keys are configured in the environment or credential manager and are absent from the examples. The n8n template has not yet been executed in a live n8n installation.
+[Python pipeline, mapping guide and inactive n8n template](examples/README.md) connect the existing [Invoice Extractor](https://rapidapi.com/tuyentn23/api/invoice-to-json-extractor1) to this validator. Keys are configured in the environment or credential manager and are absent from the examples. The combined Extractor-to-Validator template has not been verified end-to-end through RapidAPI. The separate validator-only starter was executed in n8n 2.42.6 with a local synthetic endpoint; authenticated RapidAPI execution remains unverified.
 
 ## Other backend functions
 
